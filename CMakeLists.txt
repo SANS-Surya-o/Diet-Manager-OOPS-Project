@@ -16,6 +16,8 @@ set(SOURCES
     src/food/CompositeFood.cpp
     src/database/FoodDatabase.cpp
     src/utils/FileHandler.cpp
+    src/daily_log/DailyLog.cpp
+    src/diet_goal/DietGoalProfile.cpp
 )
 
 # Create executable
@@ -48,8 +50,6 @@ if(NOT EXISTS ${CMAKE_BINARY_DIR}/data/composite_foods.txt)
     file(WRITE ${CMAKE_BINARY_DIR}/data/composite_foods.txt
         "# Composite Foods Database\n"
         "# Format: COMPOSITE:id:keyword1,keyword2,...:foodId=servings;foodId=servings;...\n"
-        "COMPOSITE:pbj_sandwich:sandwich,lunch,protein:bread_slice=2;peanut_butter=1;jelly=1\n"
-        "COMPOSITE:cereal_with_milk:breakfast,dairy,grain:cereal=1;milk=1\n"
     )
 endif()
 

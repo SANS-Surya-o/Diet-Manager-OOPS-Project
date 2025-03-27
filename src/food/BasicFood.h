@@ -46,6 +46,7 @@ public:
      */
     void display() const override;
 
+
 private:
     double caloriesPerServing; // Calories per serving of this food
 };

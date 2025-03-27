@@ -71,6 +71,12 @@ public:
      */
     virtual void display() const = 0;
 
+    /**
+     * @brief Get the name (ID) of the food
+     * @return Food name
+     */
+    std::string getName() const { return id; }
+
 protected:
     std::string id;                    // Unique identifier
     std::vector<std::string> keywords; // Search keywords

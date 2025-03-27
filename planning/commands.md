@@ -1,8 +1,0 @@
-# Commands
-- `add <name>`: `name` may contain spaces. User is then prompted for space-separated keywords (case-insensitive and may not contain spaces). Finally, the user is prompted for the number of calories per serving. The database entry is made. Identifier is auto-generated. Show a success/failure message, along with the identifier.
-- `compose`: The UI keeps prompting for food identifiers, then quantities. Maybe reserve `end` for the purpose of ending this sequence. Database entry is made, with identifier and calories assigned automatically. Show a success/failure message along with the identifier and calories. Maybe implement a feature to search while composing? Could be done from another such process. Database will be the same anyway.
-- `delete <uid>`: Deletes the item with identifier `uid`. Show a success/failure message.
-- `filter any <keywords>`: Prints identifiers, names and calories of foods which contain any of the keywords in `keywords`. `keywords` must be space-separated. Print constituent foods of composite foods.
-- `filter all <keywords>`: Similar.
-- `update weight <weight> age <age> activity <level>`: used for daily updates. Any of `weight <weight>`, `age <age>`, or `activity <level>` may be omitted. All of them cannot be omitted simultaneously.
-- `intake <algorithm>`: Outputs the remaining calories to be consumed according to algorithm `algorithm`. `intake algo list` will list down all algorithms.
