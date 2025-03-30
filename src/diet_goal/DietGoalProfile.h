@@ -2,56 +2,94 @@
 #define DIET_GOAL_PROFILE_H
 
 #include <string>
-#include <memory>
 #include <vector>
+#include <functional>
 
 enum class ActivityLevel {
     SEDENTARY,
     LIGHTLY_ACTIVE,
     MODERATELY_ACTIVE,
     VERY_ACTIVE,
-    EXTRA_ACTIVE
+    EXTRA_ACTIVE,
+    UNDEFINED
 };
 
-enum class CalorieCalculationMethod {
-    HARRIS_BENEDICT,
-    MIFFLIN_ST_JEOR
+enum class Gender {
+    UNDEFINED = -1, MALE, FEMALE
+};
+
+struct DietProfileLog {
+    std::string date;
+    int age;
+    double weight;
+    ActivityLevel activityLevel;
+    int calorieCalculationMethodIdx;
+
+    DietProfileLog(std::string date, int age, double weight, ActivityLevel activityLevel, int methodIdx)
+        : date(date), age(age), weight(weight), activityLevel(activityLevel), calorieCalculationMethodIdx(methodIdx) {}
+};
+
+class CalorieCalculationMethod {
+public:
+    CalorieCalculationMethod(std::string title, std::function<double(Gender, double, double, int)> calculationFunction);
+
+    double calculate(Gender gender, double weight, double height, int age) const;
+
+    std::string title() const { return m_title; }
+
+private:
+    std::string m_title;
+    std::function<double(Gender, double, double, int)> m_calculationFunction;
 };
 
 class DietGoalProfile {
 public:
-    DietGoalProfile();
+    DietGoalProfile(std::string filepath);
 
     // Setters for profile information
-    void setGender(const std::string& gender);
+    void setGender(Gender gender);
     void setHeight(double height);  // in cm
     void setWeight(double weight);  // in kg
     void setAge(int age);
     void setActivityLevel(ActivityLevel level);
-    void setCalorieCalculationMethod(CalorieCalculationMethod method);
+    void setCalorieCalculationMethod(int idx);
+    bool loaded();
+    void initializeProfileFromUser();
 
     // Getters
-    std::string getGender() const;
+    Gender getGender() const;
     double getHeight() const;
     double getWeight() const;
     int getAge() const;
     ActivityLevel getActivityLevel() const;
-    CalorieCalculationMethod getCalorieCalculationMethod() const;
+    const CalorieCalculationMethod& getCalorieCalculationMethod() const;
+    int numberOfCalculationMethods() const;
+
+    void saveToFile();
+    void loadFromFile();
+    void listCalculationMethods() const;
 
     // Calculate target calories
     double calculateTargetCalories() const;
 
+    void addLog(const DietProfileLog& log);
+    void saveLogsToFile();
+    void loadLogsFromFile();
+
 private:
-    std::string m_gender;
+    Gender m_gender;
     double m_height;
     double m_weight;
     int m_age;
+    bool m_loaded;
     ActivityLevel m_activityLevel;
-    CalorieCalculationMethod m_calculationMethod;
+    const CalorieCalculationMethod* m_calculationMethod; // Pointer to selected method
+    std::string m_filepath;
 
-    // Private calculation methods for different calorie estimation approaches
-    double calculateHarrisBenedictCalories() const;
-    double calculateMifflinStJeorCalories() const;
+    // Array of available calorie calculation methods
+    static const std::vector<CalorieCalculationMethod> calorieCalculationMethods;
+
+    std::vector<DietProfileLog> m_logs;
 };
 
 #endif // DIET_GOAL_PROFILE_H
