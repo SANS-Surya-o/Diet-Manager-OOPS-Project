@@ -4,6 +4,8 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <ctime>
+#include <algorithm>
 
 const std::vector<CalorieCalculationMethod> DietGoalProfile::calorieCalculationMethods = {
     CalorieCalculationMethod("Harris-Benedict", [](Gender gender, double weight, double height, int age) {
@@ -40,6 +42,7 @@ void DietGoalProfile::setGender(Gender gender) {
         throw std::invalid_argument("Gender must be 'male' or 'female'");
     }
     m_gender = gender;
+    if (m_loaded) createLog();
 }
 
 void DietGoalProfile::setHeight(double height) {
@@ -47,6 +50,7 @@ void DietGoalProfile::setHeight(double height) {
         throw std::invalid_argument("Height must be positive");
     }
     m_height = height;
+    if (m_loaded) createLog();
 }
 
 void DietGoalProfile::setWeight(double weight) {
@@ -54,6 +58,7 @@ void DietGoalProfile::setWeight(double weight) {
         throw std::invalid_argument("Weight must be positive");
     }
     m_weight = weight;
+    if (m_loaded) createLog();
 }
 
 void DietGoalProfile::setAge(int age) {
@@ -61,6 +66,7 @@ void DietGoalProfile::setAge(int age) {
         throw std::invalid_argument("Age must be positive");
     }
     m_age = age;
+    if (m_loaded) createLog();
 }
 
 void DietGoalProfile::setActivityLevel(ActivityLevel level) {
@@ -68,10 +74,26 @@ void DietGoalProfile::setActivityLevel(ActivityLevel level) {
         throw std::invalid_argument("Activity level must be between SEDENTARY and EXTRA ACTIVE");
     }
     m_activityLevel = level;
+    if (m_loaded) createLog();
 }
 
 void DietGoalProfile::setCalorieCalculationMethod(int idx) {
     m_calculationMethod = &calorieCalculationMethods[idx-1];
+    if (m_loaded) createLog();
+}
+
+void DietGoalProfile::createLog() {
+    if (!m_calculationMethod) {
+        throw std::runtime_error("Cannot create log: Calorie calculation method not set");
+    }
+    
+    auto now = std::time(nullptr);
+    char dateBuffer[11];
+    std::strftime(dateBuffer, sizeof(dateBuffer), "%d-%m-%Y", std::localtime(&now));
+    std::string date(dateBuffer);
+    
+    int methodIdx = m_calculationMethod - &calorieCalculationMethods[0] + 1;
+    m_logs.emplace_back(date, m_age, m_weight, m_activityLevel, methodIdx);
 }
 
 Gender DietGoalProfile::getGender() const { return m_gender; }
@@ -103,18 +125,17 @@ double DietGoalProfile::calculateTargetCalories() const {
     }
 }
 
-void DietGoalProfile::saveToFile() {
+bool DietGoalProfile::saveToFile() {
+    if(!m_loaded) return true;
     std::ofstream outFile(m_filepath);
     if (!outFile) {
         throw std::runtime_error("Failed to open file for writing: " + m_filepath);
+        return false;
     }
 
-    outFile << (m_gender == Gender::MALE ? "M" : "F") << '\n'
-            << m_height << '\n'
-            << m_weight << '\n'
-            << m_age << '\n'
-            << static_cast<int>(m_activityLevel) << '\n'
-            << m_calculationMethod->title() << '\n';
+    outFile << "# User info database\n# log format: DD-MM-YYYY:age:weight:activitylevel:method\n"
+            << "gender:" << (m_gender == Gender::MALE ? "M" : "F") << '\n'
+            << "height:" << m_height << '\n';
 
     // Save logs
     DietProfileLog* prevLog = nullptr;
@@ -133,10 +154,10 @@ void DietGoalProfile::saveToFile() {
     }
 
     outFile.close();
+    return true;
 }
 
 void DietGoalProfile::initializeProfileFromUser() {
-        
         std::string gender;
         std::cout << "Enter your gender (M/F): ";
         std::cin >> gender;
@@ -147,8 +168,8 @@ void DietGoalProfile::initializeProfileFromUser() {
         while (true) {
             try {
                 std::cin >> height;
-                setHeight(height); // Attempt to set the height
-                break; // Exit the loop if no exception is raised
+                setHeight(height);
+                break;
             } catch (const std::invalid_argument& e) {
                 std::cout << "Invalid height. " << e.what() << " Please enter again: ";
             }
@@ -159,8 +180,8 @@ void DietGoalProfile::initializeProfileFromUser() {
         while (true) {
             try {
                 std::cin >> activityLevel;
-                setActivityLevel(static_cast<ActivityLevel>(activityLevel - 1)); // Adjust for zero-based index
-                break; // Exit the loop if no exception is raised
+                setActivityLevel(static_cast<ActivityLevel>(activityLevel - 1));
+                break;
             } catch (const std::invalid_argument& e) {
                 std::cout << "Invalid activity level. " << e.what() << " Please enter again: ";
             }
@@ -187,6 +208,11 @@ void DietGoalProfile::initializeProfileFromUser() {
             std::cin >> methodChoice;
         }
         setCalorieCalculationMethod(methodChoice);
+
+        // Create a log entry after all data is collected
+        createLog();
+
+        m_loaded = true;
 }
 
 void DietGoalProfile::listCalculationMethods() const {
@@ -263,14 +289,18 @@ void DietGoalProfile::loadFromFile() {
         std::getline(logStream, methodIdxStr, ':');
 
         age = ageStr.empty() ? prevAge : std::stoi(ageStr);
+        setAge(age);
         weight = weightStr.empty() ? prevWeight : std::stod(weightStr);
+        setWeight(weight);
         activityLevel = activityLevelStr.empty() ? prevActivityLevel : static_cast<ActivityLevel>(std::stoi(activityLevelStr));
+        setActivityLevel(activityLevel);
         methodIdx = methodIdxStr.empty() ? prevMethodIdx : std::stoi(methodIdxStr);
-
+        setCalorieCalculationMethod(methodIdx);
         if (prevDate.empty() && (age == -1 || weight == -1 || activityLevel == ActivityLevel::UNDEFINED || methodIdx == -1)) {
             throw std::runtime_error("First day's parameters must all be specified");
         }
 
+        // Create and add the log entry
         m_logs.emplace_back(date, age, weight, activityLevel, methodIdx);
 
         prevDate = date;
@@ -279,6 +309,8 @@ void DietGoalProfile::loadFromFile() {
         prevActivityLevel = activityLevel;
         prevMethodIdx = methodIdx;
     }
+
+    m_loaded = true;
 
     inFile.close();
 }

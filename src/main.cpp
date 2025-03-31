@@ -74,7 +74,7 @@ int main()
             break;
         case 4:
             // Save database, logs, and exit
-            if (foodDB.saveFoods() && logManager.saveLogs())
+            if (foodDB.saveFoods() && logManager.saveLogs() && dietProfile.saveToFile())
             {
                 std::cout << "Database and logs saved successfully." << std::endl;
                 running = false;

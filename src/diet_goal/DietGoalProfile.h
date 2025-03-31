@@ -65,7 +65,7 @@ public:
     const CalorieCalculationMethod& getCalorieCalculationMethod() const;
     int numberOfCalculationMethods() const;
 
-    void saveToFile();
+    bool saveToFile();
     void loadFromFile();
     void listCalculationMethods() const;
 
@@ -77,6 +77,7 @@ public:
     void loadLogsFromFile();
 
 private:
+    void createLog();  // Helper method to create a log entry with current profile data
     Gender m_gender;
     double m_height;
     double m_weight;
