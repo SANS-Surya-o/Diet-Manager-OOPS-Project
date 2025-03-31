@@ -49,7 +49,7 @@ int main()
     }
 
     // Initialize diet goal profile
-    DietGoalProfile dietProfile;
+    DietGoalProfile dietProfile("data/diet_profile.txt");
 
     bool running = true;
     while (running)
@@ -74,7 +74,7 @@ int main()
             break;
         case 4:
             // Save database, logs, and exit
-            if (foodDB.saveFoods() && logManager.saveLogs())
+            if (foodDB.saveFoods() && logManager.saveLogs() && dietProfile.saveToFile())
             {
                 std::cout << "Database and logs saved successfully." << std::endl;
                 running = false;
@@ -541,6 +541,18 @@ void manageDailyLogs(FoodDatabase &db, LogManager &logManager)
 
 void manageDietGoalProfile(DietGoalProfile &profile)
 {
+    if (!profile.loaded())
+    {
+        try
+        {
+            profile.loadFromFile();
+        }
+        catch (const std::exception &e)
+        {
+            profile.initializeProfileFromUser();
+        }
+    }
+
     bool managing = true;
     while (managing)
     {
@@ -564,11 +576,11 @@ void manageDietGoalProfile(DietGoalProfile &profile)
         case 1:
         {
             std::string gender;
-            std::cout << "Enter gender (male/female): ";
+            std::cout << "Enter gender (M/F): ";
             std::getline(std::cin, gender);
             try
             {
-                profile.setGender(gender);
+                profile.setGender(gender == "M" ? Gender::MALE : Gender::FEMALE);
             }
             catch (const std::exception &e)
             {
@@ -657,31 +669,16 @@ void manageDietGoalProfile(DietGoalProfile &profile)
         case 6:
         {
             std::cout << "Select Calorie Calculation Method:" << std::endl;
-            std::cout << "1. Harris-Benedict" << std::endl;
-            std::cout << "2. Mifflin-St Jeor" << std::endl;
+            profile.listCalculationMethods();
 
             int methodChoice;
             std::cin >> methodChoice;
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-            CalorieCalculationMethod methods[] = {
-                CalorieCalculationMethod::HARRIS_BENEDICT,
-                CalorieCalculationMethod::MIFFLIN_ST_JEOR};
-
             if (methodChoice >= 1 && methodChoice <= 2)
             {
-                profile.setCalorieCalculationMethod(methods[methodChoice - 1]);
-                std::cout << "Calorie calculation method set to ";
-                switch (methodChoice)
-                {
-                case 1:
-                    std::cout << "Harris-Benedict";
-                    break;
-                case 2:
-                    std::cout << "Mifflin-St Jeor";
-                    break;
-                }
-                std::cout << std::endl;
+                profile.setCalorieCalculationMethod(methodChoice);
+                std::cout << "Setting method successful." << std::endl;
             }
             else
             {
