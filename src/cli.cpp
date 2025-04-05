@@ -1,10 +1,3 @@
-#include "food/Food.h"
-#include "food/BasicFood.h"
-#include "food/CompositeFood.h"
-#include "database/FoodDatabase.h"
-#include "diet_goal/DietGoalProfile.h"
-#include "daily_log/DailyLog.h"
-#include "utils/FileHandler.h"
 #include "cli.h"
 #include <iostream>
 #include <string>
@@ -14,93 +7,7 @@
 #include <algorithm>
 #include <limits>
 
-// Function prototypes
-void displayMainMenu();
-void manageFoodDatabase(FoodDatabase &db);
-void manageDailyLogs(FoodDatabase &db, LogManager &logManager);
-void manageDietGoalProfile(DietGoalProfile &profile);
-
-// Food Database Operations
-void displayMenu();
-void addBasicFood(FoodDatabase &db);
-void createCompositeFood(FoodDatabase &db);
-void searchFoods(FoodDatabase &db);
-void displayAllFoods(FoodDatabase &db);
-std::vector<std::string> splitString(const std::string &str, char delimiter);
-
-int main()
-{
-    auto cli = CLI();
-    return cli.run();
-    // Create data directory if not exists
-    // FileHandler::createDirectoryIfNotExists("data");
-
-    // // Initialize the food database
-    // FoodDatabase foodDB("data/basic_foods.txt", "data/composite_foods.txt");
-
-    // // Load existing foods from database files
-    // if (!foodDB.loadFoods())
-    // {
-    //     std::cout << "Failed to load food database. Starting with an empty database." << std::endl;
-    // }
-
-    // // Initialize log manager
-    // LogManager logManager("data/daily_logs.txt");
-    // if (!logManager.loadLogs(foodDB))
-    // {
-    //     std::cout << "Failed to load daily logs. Starting with an empty log." << std::endl;
-    // }
-
-    // // Initialize diet goal profile
-    // DietGoalProfile dietProfile("data/diet_profile.txt");
-
-    // bool running = true;
-    // while (running)
-    // {
-    //     displayMainMenu();
-
-    //     int choice;
-    //     std::cout << "Enter your choice: ";
-    //     std::cin >> choice;
-    //     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Clear input buffer
-
-    //     switch (choice)
-    //     {
-    //     case 1:
-    //         manageFoodDatabase(foodDB);
-    //         break;
-    //     case 2:
-    //         manageDailyLogs(foodDB, logManager);
-    //         break;
-    //     case 3:
-    //         manageDietGoalProfile(dietProfile);
-    //         break;
-    //     case 4:
-    //         // Save database, logs, and exit
-    //         if (foodDB.saveFoods() && logManager.saveLogs() && dietProfile.saveToFile())
-    //         {
-    //             std::cout << "Database and logs saved successfully." << std::endl;
-    //             running = false;
-    //         }
-    //         else
-    //         {
-    //             std::cout << "Failed to save database or logs." << std::endl;
-    //         }
-    //         break;
-    //     case 0:
-    //         running = false;
-    //         break;
-    //     default:
-    //         std::cout << "Invalid choice. Please try again." << std::endl;
-    //     }
-
-    //     std::cout << std::endl;
-    // }
-
-    // return 0;
-}
-
-void displayMainMenu()
+void CLI::displayMainMenu()
 {
     std::cout << "=======================================" << std::endl;
     std::cout << "      YADA - Diet Management System    " << std::endl;
@@ -113,9 +20,7 @@ void displayMainMenu()
     std::cout << "=======================================" << std::endl;
 }
 
-// Food Database Micro Operations
-
-void displayMenu()
+void CLI::displayMenu()
 {
     std::cout << "=======================================" << std::endl;
     std::cout << "           YADA Food Database          " << std::endl;
@@ -129,49 +34,7 @@ void displayMenu()
     std::cout << "=======================================" << std::endl;
 }
 
-void addBasicFood(FoodDatabase &db)
-{
-    std::string id, keywordsStr;
-    double calories;
-
-    std::cout << "=== Add Basic Food ===" << std::endl;
-
-    // Get food ID
-    std::cout << "Enter food ID: ";
-    std::getline(std::cin, id);
-
-    // Check if ID already exists
-    if (db.getFoodById(id) != nullptr)
-    {
-        std::cout << "A food with this ID already exists." << std::endl;
-        return;
-    }
-
-    // Get keywords
-    std::cout << "Enter keywords (comma-separated): ";
-    std::getline(std::cin, keywordsStr);
-
-    // Get calories
-    std::cout << "Enter calories per serving: ";
-    std::cin >> calories;
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Clear input buffer
-
-    // Split keywords string into vector
-    std::vector<std::string> keywords = splitString(keywordsStr, ',');
-
-    // Create and add the basic food
-    auto basicFood = std::make_shared<BasicFood>(id, keywords, calories);
-    if (db.addBasicFood(basicFood))
-    {
-        std::cout << "Basic food added successfully." << std::endl;
-    }
-    else
-    {
-        std::cout << "Failed to add basic food." << std::endl;
-    }
-}
-
-void createCompositeFood(FoodDatabase &db)
+void CLI::createCompositeFood(FoodDatabase &db)
 {
     std::string id, keywordsStr;
 
@@ -250,7 +113,49 @@ void createCompositeFood(FoodDatabase &db)
     }
 }
 
-void searchFoods(FoodDatabase &db)
+void CLI::addBasicFood(FoodDatabase &db)
+{
+    std::string id, keywordsStr;
+    double calories;
+
+    std::cout << "=== Add Basic Food ===" << std::endl;
+
+    // Get food ID
+    std::cout << "Enter food ID: ";
+    std::getline(std::cin, id);
+
+    // Check if ID already exists
+    if (db.getFoodById(id) != nullptr)
+    {
+        std::cout << "A food with this ID already exists." << std::endl;
+        return;
+    }
+
+    // Get keywords
+    std::cout << "Enter keywords (comma-separated): ";
+    std::getline(std::cin, keywordsStr);
+
+    // Get calories
+    std::cout << "Enter calories per serving: ";
+    std::cin >> calories;
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Clear input buffer
+
+    // Split keywords string into vector
+    std::vector<std::string> keywords = splitString(keywordsStr, ',');
+
+    // Create and add the basic food
+    auto basicFood = std::make_shared<BasicFood>(id, keywords, calories);
+    if (db.addBasicFood(basicFood))
+    {
+        std::cout << "Basic food added successfully." << std::endl;
+    }
+    else
+    {
+        std::cout << "Failed to add basic food." << std::endl;
+    }
+}
+
+void CLI::searchFoods(FoodDatabase &db)
 {
     std::string keywordsStr;
     char matchType;
@@ -289,12 +194,12 @@ void searchFoods(FoodDatabase &db)
     }
 }
 
-void displayAllFoods(FoodDatabase &db)
+void CLI::displayAllFoods(FoodDatabase &db)
 {
     db.displayAllFoods();
 }
 
-std::vector<std::string> splitString(const std::string &str, char delimiter)
+std::vector<std::string> CLI::splitString(const std::string &str, char delimiter)
 {
     std::vector<std::string> tokens;
     std::string token;
@@ -315,7 +220,7 @@ std::vector<std::string> splitString(const std::string &str, char delimiter)
     return tokens;
 }
 
-void manageFoodDatabase(FoodDatabase &foodDB)
+void CLI::manageFoodDatabase(FoodDatabase &foodDB)
 {
 
     bool running = true;
@@ -373,7 +278,7 @@ void manageFoodDatabase(FoodDatabase &foodDB)
     }
 }
 
-void manageDailyLogs(FoodDatabase &db, LogManager &logManager)
+void CLI::manageDailyLogs(FoodDatabase &db, LogManager &logManager)
 {
     bool managingLogs = true;
     while (managingLogs)
@@ -482,8 +387,8 @@ void manageDailyLogs(FoodDatabase &db, LogManager &logManager)
             {
                 const auto &entry = log.getFoodEntries()[i];
                 std::cout << i + 1 << ". " << entry.getFood()->getId()
-                          << " - " << entry.getServings() << " servings, "
-                          << entry.getTotalCalories() << " calories" << std::endl;
+                        << " - " << entry.getServings() << " servings, "
+                        << entry.getTotalCalories() << " calories" << std::endl;
             }
             std::cout << "Total Calories: " << log.getTotalCalories() << std::endl;
             break;
@@ -542,7 +447,7 @@ void manageDailyLogs(FoodDatabase &db, LogManager &logManager)
     }
 }
 
-void manageDietGoalProfile(DietGoalProfile &profile)
+void CLI::manageDietGoalProfile(DietGoalProfile &profile)
 {
     if (!profile.loaded())
     {
@@ -709,4 +614,65 @@ void manageDietGoalProfile(DietGoalProfile &profile)
             std::cout << "Invalid choice." << std::endl;
         }
     }
+}
+
+CLI::CLI() {
+    // Load existing foods from database files
+    foodDB = FoodDatabase("data/basic_foods.txt", "data/composite_foods.txt");
+    logManager = LogManager("data/daily_logs.txt");
+    dietProfile = DietGoalProfile("data/diet_profile.txt");
+    if (!foodDB.loadFoods())
+    {
+        std::cout << "Failed to load food database. Starting with an empty database." << std::endl;
+    }
+    if (!logManager.loadLogs(foodDB))
+    {
+        std::cout << "Failed to load daily logs. Starting with an empty log." << std::endl;
+    }
+}
+
+int CLI::run() {
+    bool running = true;
+    while (running)
+    {
+        displayMainMenu();
+
+        int choice;
+        std::cout << "Enter your choice: ";
+        std::cin >> choice;
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Clear input buffer
+
+        switch (choice)
+        {
+        case 1:
+            manageFoodDatabase(foodDB);
+            break;
+        case 2:
+            manageDailyLogs(foodDB, logManager);
+            break;
+        case 3:
+            manageDietGoalProfile(dietProfile);
+            break;
+        case 4:
+            // Save database, logs, and exit
+            if (foodDB.saveFoods() && logManager.saveLogs() && dietProfile.saveToFile())
+            {
+                std::cout << "Database and logs saved successfully." << std::endl;
+                running = false;
+            }
+            else
+            {
+                std::cout << "Failed to save database or logs." << std::endl;
+            }
+            break;
+        case 0:
+            running = false;
+            break;
+        default:
+            std::cout << "Invalid choice. Please try again." << std::endl;
+        }
+
+        std::cout << std::endl;
+    }
+    return 0;
 }

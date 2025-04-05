@@ -44,7 +44,7 @@ private:
 
 class DietGoalProfile {
 public:
-    DietGoalProfile(std::string filepath);
+    DietGoalProfile(std::string filepath = "data/diet_profile.txt");
 
     // Setters for profile information
     void setGender(Gender gender);

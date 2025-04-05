@@ -68,7 +68,7 @@ public:
         double servings;
         size_t index; // Only used for REMOVE actions
     };
-    LogManager(const std::string &logFilePath);
+    LogManager(const std::string &logFilePath = "data/daily_logs.txt");
 
     // Load logs from file
     bool loadLogs(FoodDatabase &db);

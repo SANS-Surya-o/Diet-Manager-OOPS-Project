@@ -19,7 +19,7 @@ public:
      * @param basicFoodFilePath Path to the basic foods database file
      * @param compositeFoodFilePath Path to the composite foods database file
      */
-    FoodDatabase(const std::string& basicFoodFilePath, const std::string& compositeFoodFilePath);
+    FoodDatabase(const std::string& basicFoodFilePath = "data/basic_foods.txt", const std::string& compositeFoodFilePath = "data/composite_foods.txt");
     
     /**
      * @brief Destructor for FoodDatabase

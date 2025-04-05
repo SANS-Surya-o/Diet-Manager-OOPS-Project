@@ -21,6 +21,7 @@ set(SOURCES
     src/utils/FileHandler.cpp
     src/daily_log/DailyLog.cpp
     src/diet_goal/DietGoalProfile.cpp
+    src/cli.cpp
 )
 
 # Create executable
