@@ -17,7 +17,7 @@
 void displayMainMenu();
 void manageFoodDatabase(FoodDatabase &db);
 void manageDailyLogs(FoodDatabase &db, LogManager &logManager);
-void manageDietGoalProfile(DietGoalProfile &profile);
+void manageDietGoalProfile(DietGoalProfile &profile, LogManager &logManager);
 
 // Food Database Operations
 void displayMenu();
@@ -70,7 +70,7 @@ int main()
             manageDailyLogs(foodDB, logManager);
             break;
         case 3:
-            manageDietGoalProfile(dietProfile);
+            manageDietGoalProfile(dietProfile, logManager);
             break;
         case 4:
             // Save database, logs, and exit
@@ -539,7 +539,7 @@ void manageDailyLogs(FoodDatabase &db, LogManager &logManager)
     }
 }
 
-void manageDietGoalProfile(DietGoalProfile &profile)
+void manageDietGoalProfile(DietGoalProfile &profile, LogManager &logManager)
 {
     if (!profile.loaded())
     {
@@ -564,6 +564,7 @@ void manageDietGoalProfile(DietGoalProfile &profile)
         std::cout << "5. Set Activity Level" << std::endl;
         std::cout << "6. Set Calorie Calculation Method" << std::endl;
         std::cout << "7. Calculate Target Calories" << std::endl;
+        std::cout << "8. Calculate difference" << std::endl;
         std::cout << "0. Return to Main Menu" << std::endl;
 
         int choice;
@@ -696,6 +697,52 @@ void manageDietGoalProfile(DietGoalProfile &profile)
             catch (const std::exception &e)
             {
                 std::cout << "Error calculating target calories: " << e.what() << std::endl;
+            }
+            break;
+        }
+        case 8:
+        {
+            try
+            {
+                // Get current date in DD-MM-YYYY format
+                auto now = std::time(nullptr);
+                char dateBuffer[11];
+                std::strftime(dateBuffer, sizeof(dateBuffer), "%d-%m-%Y", std::localtime(&now));
+                std::string currentDate(dateBuffer);
+
+                // Ask user if they want to use current date or enter a different date
+                std::cout << "Current date is: " << currentDate << std::endl;
+
+                // Get the daily log for this date
+                const DailyLog &log = logManager.getLog(currentDate);
+
+                // Calculate consumed and target calories
+                double consumedCalories = log.getTotalCalories();
+                double targetCalories = profile.calculateTargetCalories();
+                double difference = consumedCalories - targetCalories;
+
+                // Display results
+                std::cout << "\n=== Calorie Summary for " << currentDate << " ===" << std::endl;
+                std::cout << "Calories consumed: " << consumedCalories << std::endl;
+                std::cout << "Target calories: " << targetCalories << std::endl;
+                std::cout << "Difference: " << difference << " calories" << std::endl;
+
+                if (difference < 0)
+                {
+                    std::cout << "You have " << -difference << " calories available to consume today." << std::endl;
+                }
+                else if (difference > 0)
+                {
+                    std::cout << "You have exceeded your calorie target by " << difference << " calories." << std::endl;
+                }
+                else
+                {
+                    std::cout << "You've met your exact calorie target!" << std::endl;
+                }
+            }
+            catch (const std::exception &e)
+            {
+                std::cout << "Error calculating calorie difference: " << e.what() << std::endl;
             }
             break;
         }

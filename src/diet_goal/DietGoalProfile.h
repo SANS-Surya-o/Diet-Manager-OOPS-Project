@@ -71,8 +71,8 @@ public:
 
     // Calculate target calories
     double calculateTargetCalories() const;
-
     void addLog(const DietProfileLog& log);
+
     void saveLogsToFile();
     void loadLogsFromFile();
 
