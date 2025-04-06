@@ -1,89 +1,110 @@
 ```mermaid
----
-title: YADA
----
 classDiagram
+    title YADA
     class Food {
         <<abstract>>
-        -String id
-        -List~String~ keywords
-        +Food(String id, List~String~ keywords)
-        +String getId()
-        +List~String~ getKeywords()
-        +boolean matchesAllKeywords(List~String~ keywords)
-        +boolean matchesAnyKeyword(List~String~ keywords)
-        +double getCaloriesPerServing()*
-        +String toString()*
-        +void display()*
+        -string id
+        -vector~string~ keywords
+        +Food(string id, vector~string~ keywords)
+        +string getId()
+        +vector~string~ getKeywords()
+        +void addKeyword(string keyword)
+        +bool matchesAllKeywords(vector~string~ keywords)
+        +bool matchesAnyKeyword(vector~string~ keywords)
+        +string getName()
+        +double getCaloriesPerServing()
+        +string toString()
+        +void display()
     }
     
     class BasicFood {
         -double caloriesPerServing
-        +BasicFood(String id, List~String~ keywords, double calories)
+        +BasicFood(string id, vector~string~ keywords, double calories)
         +void setCaloriesPerServing(double calories)
         +double getCaloriesPerServing() override
-        +String toString() override
+        +string toString() override
         +void display() override
-        +static BasicFood fromString(String str)
+        +static shared_ptr~BasicFood~ fromString(string str)
     }
     
     class CompositeFood {
-        -Map~Food,double~ components
-        +CompositeFood(String id, List~String~ keywords)
-        +void addComponent(Food food, double servings)
-        +Map~Food,double~ getComponents()
+        -map~shared_ptr~Food~,double~ components
+        +CompositeFood(string id, vector~string~ keywords)
+        +void addComponent(shared_ptr~Food~ food, double servings)
+        +map~shared_ptr~Food~,double~ getComponents()
         +double getCaloriesPerServing() override
-        +String toString() override
+        +string toString() override
         +void display() override
-        +static CompositeFood fromString(String str, Map~String,Food~ foodMap)
+        +static shared_ptr~CompositeFood~ fromString(string str, map~string,shared_ptr~Food~~ foodMap)
     }
     
     class FoodDatabase {
-        -String basicFoodFilePath
-        -String compositeFoodFilePath
-        -Map~String,Food~ foods
-        +FoodDatabase(String basicFoodPath, String compositeFoodPath)
+        -string basicFoodFilePath
+        -string compositeFoodFilePath
+        -map~string,shared_ptr~Food~~ foods
+        +FoodDatabase(string basicFoodPath, string compositeFoodPath)
         +bool loadFoods()
         +bool saveFoods()
-        +bool addBasicFood(BasicFood food)
-        +bool addCompositeFood(CompositeFood food)
-        +Food getFoodById(String id)
-        +List~Food~ findFoodsMatchingAllKeywords(List~String~ keywords)
-        +List~Food~ findFoodsMatchingAnyKeyword(List~String~ keywords)
-        +List~Food~ getAllFoods()
+        +bool addBasicFood(shared_ptr~BasicFood~ food)
+        +bool addCompositeFood(shared_ptr~CompositeFood~ food)
+        +shared_ptr~Food~ getFoodById(string id)
+        +vector~shared_ptr~Food~~ findFoodsMatchingAllKeywords(vector~string~ keywords)
+        +vector~shared_ptr~Food~~ findFoodsMatchingAnyKeyword(vector~string~ keywords)
+        +vector~shared_ptr~Food~~ getAllFoods()
         +void displayAllFoods()
+        -bool loadBasicFoods()
+        -bool loadCompositeFoods()
+        -bool saveBasicFoods()
+        -bool saveCompositeFoods()
     }
     
     class DailyLogEntry {
-        -Food food
-        -double servings
-        +DailyLogEntry(Food food, double servings)
-        +Food getFood()
+        -shared_ptr~Food~ m_food
+        -double m_servings
+        +DailyLogEntry(shared_ptr~Food~ food, double servings)
+        +shared_ptr~Food~ getFood()
         +double getServings()
         +double getTotalCalories()
     }
     
     class DailyLog {
-        -List~DailyLogEntry~ foodEntries
-        +void addFoodEntry(Food food, double servings)
-        +bool removeFoodEntry(int index)
-        +List~DailyLogEntry~ getFoodEntries()
+        -vector~DailyLogEntry~ m_foodEntries
+        +void addFoodEntry(shared_ptr~Food~ food, double servings)
+        +bool removeFoodEntry(size_t index)
+        +const vector~DailyLogEntry~ getFoodEntries()
         +double getTotalCalories()
         +void clearEntries()
-        +void insertFoodEntry(Food food, double servings, int index)
+        +void insertFoodEntry(shared_ptr~Food~ food, double servings, size_t index)
     }
     
     class LogManager {
-        -Map~String,DailyLog~ logs
-        -String logFilePath
-        -List~UndoItem~ undoStack
-        +LogManager(String logFilePath)
-        +bool loadLogs(FoodDatabase db)
+        -map~string,DailyLog~ m_logs
+        -string m_logFilePath
+        -vector~UndoItem~ m_undoStack
+        +enum class LogAction
+        +struct UndoItem
+        +LogManager(string logFilePath)
+        +bool loadLogs(FoodDatabase& db)
         +bool saveLogs()
-        +DailyLog getLog(String date)
-        +bool isValidDateFormat(String date)
-        +void addUndoAction(LogAction action, String date, Food food, double servings, int index)
+        +DailyLog& getLog(string date)
+        +bool isValidDateFormat(string date)
+        +void addUndoAction(LogAction action, string date, shared_ptr~Food~ food, double servings, size_t index)
         +void undo()
+        -static string getCurrentDateString()
+    }
+    
+    class LogAction {
+        <<enumeration>>
+        ADD
+        REMOVE
+    }
+    
+    class UndoItem {
+        +LogAction action
+        +string date
+        +shared_ptr~Food~ food
+        +double servings
+        +size_t index
     }
     
     class Gender {
@@ -104,34 +125,34 @@ classDiagram
     }
     
     class CalorieCalculationMethod {
-        -String m_title
-        -Function~Gender,double,double,int~double m_calculationFunction
-        +CalorieCalculationMethod(String title, Function calculationFunction)
+        -string m_title
+        -function m_calculationFunction
+        +CalorieCalculationMethod(string title, function calculationFunction)
         +double calculate(Gender gender, double weight, double height, int age)
-        +String title()
+        +string title()
     }
     
     class DietProfileLog {
-        +String date
+        +string date
         +int age
         +double weight
         +ActivityLevel activityLevel
         +int calorieCalculationMethodIdx
-        +DietProfileLog(String date, int age, double weight, ActivityLevel activityLevel, int methodIdx)
+        +DietProfileLog(string date, int age, double weight, ActivityLevel activityLevel, int methodIdx)
     }
     
     class DietGoalProfile {
-        -String m_filepath
+        -string m_filepath
         -Gender m_gender
         -double m_height
         -double m_weight
         -int m_age
         -bool m_loaded
         -ActivityLevel m_activityLevel
-        -CalorieCalculationMethod* m_calculationMethod
-        -List~DietProfileLog~ m_logs
-        -static List~CalorieCalculationMethod~ calorieCalculationMethods
-        +DietGoalProfile(String filepath)
+        -CalorieCalculationMethod m_calculationMethod
+        -vector~DietProfileLog~ m_logs
+        -static const vector~CalorieCalculationMethod~ calorieCalculationMethods
+        +DietGoalProfile(string filepath)
         +void setGender(Gender gender)
         +void setHeight(double height)
         +void setWeight(double weight)
@@ -143,6 +164,7 @@ classDiagram
         +void loadFromFile()
         +void initializeProfileFromUser()
         +double calculateTargetCalories()
+        +double calculateRemainingCalories(DailyLog &log)
         +bool loaded()
         +Gender getGender()
         +double getHeight()
@@ -150,24 +172,32 @@ classDiagram
         +int getAge()
         +ActivityLevel getActivityLevel()
         +CalorieCalculationMethod getCalorieCalculationMethod()
+        +int numberOfCalculationMethods()
+        +void listCalculationMethods()
+        +void addLog(const DietProfileLog& log)
+        +void saveLogsToFile()
+        +void loadLogsFromFile()
     }
 
     class FileHandler {
-        +fileExists(string filepath) bool
-        +createDirectoryIfNotExists(string dirpath) bool
-        +readAllLines(string filepath) vector~string~
-        +writeAllLines(string filepath, vector~string~ lines) bool
+        <<utility>>
+        +static bool fileExists(string filepath)
+        +static bool createDirectoryIfNotExists(string dirpath)
+        +static vector~string~ readAllLines(string filepath)
+        +static bool writeAllLines(string filepath, vector~string~ lines)
     }
 
     Food <|-- BasicFood
     Food <|-- CompositeFood
-    CompositeFood o-- Food
-    FoodDatabase o-- Food
-    DailyLog o-- DailyLogEntry
-    DailyLogEntry o-- Food
-    LogManager o-- DailyLog
+    FoodDatabase o-- "*" Food
+    DailyLog o-- "*" DailyLogEntry
+    DailyLogEntry o-- "1" Food
+    LogManager o-- "*" DailyLog
+    DietGoalProfile ..> DailyLog
     DietGoalProfile -- Gender
     DietGoalProfile -- ActivityLevel
     DietGoalProfile o-- CalorieCalculationMethod
     DietGoalProfile o-- DietProfileLog
+    LogManager -- LogAction
+    LogManager o-- UndoItem
 ```

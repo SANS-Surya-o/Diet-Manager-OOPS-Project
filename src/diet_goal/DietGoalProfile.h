@@ -1,6 +1,8 @@
 #ifndef DIET_GOAL_PROFILE_H
 #define DIET_GOAL_PROFILE_H
 
+#include "../daily_log/DailyLog.h"
+
 #include <string>
 #include <vector>
 #include <functional>
@@ -71,6 +73,7 @@ public:
 
     // Calculate target calories
     double calculateTargetCalories() const;
+    double calculateRemainingCalories(DailyLog& log) const;
 
     void addLog(const DietProfileLog& log);
     void saveLogsToFile();

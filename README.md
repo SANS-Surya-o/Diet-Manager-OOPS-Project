@@ -2,6 +2,8 @@
 
 This is a prototype implementation of the YADA diet management system for DASS Assignment 3.
 
+Design document: https://docs.google.com/document/d/1FmrPOyvQ3MpeOc0lrwHk6nrPcywI_5tmapP4dgE5pNU/edit?usp=sharing
+
 ## Project Structure
 
 The project is organized as follows:

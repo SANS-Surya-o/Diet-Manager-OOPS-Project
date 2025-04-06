@@ -198,9 +198,7 @@ void DietGoalProfile::initializeProfileFromUser() {
         setAge(age);
 
         std::cout << "Enter your preferred calorie calculation method: " << std::endl;
-        for (size_t i = 0; i < calorieCalculationMethods.size(); ++i) {
-            std::cout << i + 1 << ": " << calorieCalculationMethods[i].title() << std::endl;
-        }
+        listCalculationMethods();
         int methodChoice;
         std::cin >> methodChoice;
         while (methodChoice < 1 and methodChoice > calorieCalculationMethods.size()) {
@@ -317,6 +315,12 @@ void DietGoalProfile::loadFromFile() {
 
 void DietGoalProfile::addLog(const DietProfileLog& log) {
     m_logs.push_back(log);
+}
+
+double DietGoalProfile::calculateRemainingCalories(DailyLog &log) const {
+    double targetCalories = calculateTargetCalories();
+    double consumedCalories = log.getTotalCalories();
+    return targetCalories - consumedCalories;
 }
 
 double CalorieCalculationMethod::calculate(Gender gender, double weight, double height, int age) const {

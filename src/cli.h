@@ -17,20 +17,6 @@
 #ifndef CLI_H
 #define CLI_H
 
-// Function prototypes
-void displayMainMenu();
-void manageFoodDatabase(FoodDatabase &db);
-void manageDailyLogs(FoodDatabase &db, LogManager &logManager);
-void manageDietGoalProfile(DietGoalProfile &profile);
-
-// Food Database Operations
-void displayMenu();
-void addBasicFood(FoodDatabase &db);
-void createCompositeFood(FoodDatabase &db);
-void searchFoods(FoodDatabase &db);
-void displayAllFoods(FoodDatabase &db);
-std::vector<std::string> splitString(const std::string &str, char delimiter);
-
 class CLI {
 
     private:
