@@ -1,6 +1,7 @@
 # YADA - Yet Another Diet Assistant
 
 This is a prototype implementation of the YADA diet management system for DASS Assignment 3.
+Taught me about the use of good design principles, and some OOPS concepts in C++
 
 ## Project Structure
 
